@@ -5,18 +5,17 @@ socio-demographic,Age,30-44,23.10,22.75,0.35
 socio-demographic,Age,45-64,29.97,30.73,-0.76
 socio-demographic,Age,65-79,11.27,12.15,-0.88
 socio-demographic,Age,80+,4.26,3.60,0.66
-socio-demographic,Car availability,always,74.38,61.20,13.18
-socio-demographic,Car availability,by arrangement,0.00,9.48,-9.48
+socio-demographic,Car availability,available,74.38,70.68,3.70
 socio-demographic,Car availability,never,25.62,29.32,-3.70
 socio-demographic,Household type,single person,18.19,15.41,2.79
 socio-demographic,Household type,"couple, no children",29.58,23.83,5.75
 socio-demographic,Household type,with children,34.48,56.06,-21.58
 socio-demographic,Household type,other,17.75,4.70,13.05
-spatial,PT quality at home,A,21.11,8.16,12.96
-spatial,PT quality at home,B,18.80,8.64,10.16
-spatial,PT quality at home,C,16.45,11.11,5.35
-spatial,PT quality at home,D,19.62,26.82,-7.20
-spatial,PT quality at home,none,24.01,45.28,-21.26
-spatial,Settlement pattern,city,23.44,0.00,23.44
-spatial,Settlement pattern,town/suburb,40.24,39.83,0.41
-spatial,Settlement pattern,rural,36.32,60.17,-23.85
+spatial,PT quality at home,A,7.94,8.16,-0.22
+spatial,PT quality at home,B,12.20,8.64,3.56
+spatial,PT quality at home,C,17.86,11.11,6.75
+spatial,PT quality at home,D,29.63,26.82,2.81
+spatial,PT quality at home,none,32.37,45.28,-12.90
+spatial,Settlement pattern,urban,30.21,30.21,-0.00
+spatial,Settlement pattern,intermediate,30.89,30.48,0.40
+spatial,Settlement pattern,rural,38.90,39.31,-0.40
