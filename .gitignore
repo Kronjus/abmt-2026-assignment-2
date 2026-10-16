@@ -9,3 +9,5 @@ dependency-reduced-pom.xml
 simulation_output
 core/melun_test
 /data/
+.venv
+assignment/boundary_map/output/
