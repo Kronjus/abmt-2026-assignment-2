@@ -11,3 +11,9 @@ core/melun_test
 /data/
 .venv
 assignment/boundary_map/output/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
