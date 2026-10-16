@@ -1,0 +1,6 @@
+attribute,type,total_variation_distance_pp
+Age,socio-demographic,1.64
+Car availability,socio-demographic,3.70
+Household type,socio-demographic,21.58
+PT quality at home,spatial,13.12
+Settlement pattern,spatial,0.40
