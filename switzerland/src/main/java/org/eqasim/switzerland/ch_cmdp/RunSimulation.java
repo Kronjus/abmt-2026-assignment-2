@@ -53,6 +53,8 @@ public class RunSimulation {
 		configurator.updateConfig(config);
 		configurator.configure(config);
 		cmd.applyConfiguration(config);
+		// allow storageCapacityFactor to differ from flowCapacityFactor (e.g. 0.1^0.75 for a 10% sample)
+		config.global().setRelativeToleranceForSampleSizeFactors(1.0);
         if (dsim == null && "dsim".equals(config.controller().getMobsim())) {
             throw new IllegalArgumentException("Add --use-dsim true to adapt this scenario for DSim");
         }

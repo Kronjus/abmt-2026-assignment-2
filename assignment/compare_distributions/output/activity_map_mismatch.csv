@@ -1,0 +1,11 @@
+figure,group,activities_population,activities_microcensus,total_variation_distance_pp
+activity_map,All persons,131258,6719,27.03
+activity_map,Age 6-17,22198,1248,46.72
+activity_map,Age 18-44,51783,2431,36.29
+activity_map,Age 45-64,38464,2206,40.55
+activity_map,Age 65+,18813,834,50.57
+activity_map_no_home,All persons,69956,3955,31.47
+activity_map_no_home,Age 6-17,11641,697,46.59
+activity_map_no_home,Age 18-44,28263,1478,39.12
+activity_map_no_home,Age 45-64,20334,1295,43.45
+activity_map_no_home,Age 65+,9718,485,51.58
