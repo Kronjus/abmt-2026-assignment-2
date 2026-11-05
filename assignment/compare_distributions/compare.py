@@ -61,7 +61,7 @@ ATTRIBUTES = [  # (title, categories, kind)
 
 
 def read_population():
-    attrs = {"age": "age", "carAvail": "car", "subscriptions": "sub", "home_x": "x", "home_y": "y"}
+    attrs = {"age": "age", "carAvail": "car", "subscriptions": "sub", "home_coordinate_x": "x", "home_coordinate_y": "y"}
     rows = []
     block = None
     with gzip.open(POPULATION, "rt", encoding="utf-8") as f:

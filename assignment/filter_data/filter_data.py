@@ -4,11 +4,14 @@ Usage (from the repository root):
     .venv/Scripts/python assignment/filter_data/filter_data.py
 
 Inputs : data/Boundary/fribourg_convexhull.shp (LV95)
-         data/Fribourg_10pct/fribourg_population.xml.gz (home_x/home_y in LV95)
+         data/Fribourg_10pct/fribourg_population.xml.gz (home_coordinate_x/y in LV95)
          data/microcensus/*.csv (household home W_X/W_Y in WGS84, keyed by HHNR)
 Outputs: data/filtered/fribourg_population.xml.gz
          data/filtered/microcensus/*.csv (same files, only households living inside
          whose reported day (zielpersonen.csv "tag", 1=Mon .. 7=Sun) is Monday-Friday)
+
+The population's home_x/home_y are missing for persons who stay at home all day (and 0 for one person), so the
+home is read from home_coordinate_x/y, which every person has.
 
 The population has no weekday (MATSim simulates one typical day), so only the
 microcensus is restricted to weekdays.
@@ -37,8 +40,8 @@ inside = prepared.prep(polygon)
 
 
 def filter_population():
-    home_x = re.compile(r'name="home_x"[^>]*>([^<]+)<')
-    home_y = re.compile(r'name="home_y"[^>]*>([^<]+)<')
+    home_x = re.compile(r'name="home_coordinate_x"[^>]*>([^<]+)<')
+    home_y = re.compile(r'name="home_coordinate_y"[^>]*>([^<]+)<')
     kept = total = 0
     block = None
     out_path = OUT / POPULATION.name
