@@ -7,10 +7,11 @@ socio-demographic,Age,65-79,11.27,12.15,-0.88
 socio-demographic,Age,80+,4.26,3.60,0.66
 socio-demographic,Car availability,available,74.38,70.68,3.70
 socio-demographic,Car availability,never,25.62,29.32,-3.70
-socio-demographic,Household type,single person,18.19,15.41,2.79
-socio-demographic,Household type,"couple, no children",29.58,23.83,5.75
-socio-demographic,Household type,with children,34.48,56.06,-21.58
-socio-demographic,Household type,other,17.75,4.70,13.05
+socio-demographic,PT subscription,GA,11.69,7.62,4.07
+socio-demographic,PT subscription,HT,19.94,18.27,1.67
+socio-demographic,PT subscription,VA,7.26,7.90,-0.64
+socio-demographic,PT subscription,VA+HT,4.65,4.17,0.48
+socio-demographic,PT subscription,none,56.46,62.04,-5.58
 spatial,PT quality at home,A,7.94,8.16,-0.22
 spatial,PT quality at home,B,12.20,8.64,3.56
 spatial,PT quality at home,C,17.86,11.11,6.75

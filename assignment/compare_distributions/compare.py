@@ -1,6 +1,6 @@
 """Compare the filtered synthetic population with the filtered microcensus.
 
-Three socio-demographic attributes (age, car availability, household type) and
+Three socio-demographic attributes (age, car availability, PT subscription) and
 two spatial ones (PT quality at home, settlement pattern), as shares of persons.
 
 Usage (from the repository root, after assignment/filter_data/filter_data.py):
@@ -22,8 +22,10 @@ Notes
 - Settlement pattern: both datasets are classified from the home location with the BFS Stadt/Land-
   Typologie 2012 (STALAN2012: urban / intermediate / rural municipality). Population homes are in
   EPSG:2056, microcensus homes (W_X/W_Y) are WGS84 and are transformed.
-- Household type: the population has no such attribute, so it is derived from the household
-  members (size, and whether a member is under 18).
+- PT subscription: the population has one attribute (GA, HT, VA, VA+HT, none). The microcensus asks for each
+  subscription separately (zielpersonen.csv, 1 = yes): GA = f41610a; HT = Halbtax f41610b; VA = Verbund-/Interabo
+  f41610c or Streckenabo f41610d. GA wins over everything else, HT + VA gives "VA+HT". Juniorkarte, Gleis 7 and
+  other subscriptions are not modelled and count as none, as does "not asked" (-99).
 """
 import gzip
 import re
@@ -31,12 +33,12 @@ from pathlib import Path
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 POPULATION = DATA / "filtered" / "fribourg_population.xml.gz"
-HOUSEHOLDS = DATA / "Fribourg_10pct" / "fribourg_households.xml.gz"
 MC = DATA / "filtered" / "microcensus"
 GUETEKLASSEN = DATA / "gueteklassen_oev_2026" / "OeV_Gueteklassen_ARE.gpkg"
 STADTLAND = DATA / "stadtland_typologie" / "Boundaries_G1_GDETYP2012_20230101_de.gpkg"
@@ -45,21 +47,21 @@ OUT = Path(__file__).resolve().parent / "output"
 AGE_BINS = [0, 18, 30, 45, 65, 80, 200]
 AGE_LABELS = ["0-17", "18-29", "30-44", "45-64", "65-79", "80+"]
 CAR = ["available", "never"]
-HH_TYPE = ["single person", "couple, no children", "with children", "other"]
+SUB = ["GA", "HT", "VA", "VA+HT", "none"]
 PT = ["A", "B", "C", "D", "none"]
 SETTLEMENT = ["urban", "intermediate", "rural"]
 STALAN = {"1": "urban", "2": "intermediate", "3": "rural"}  # stored as text in the gpkg
 ATTRIBUTES = [  # (title, categories, kind)
     ("Age", AGE_LABELS, "socio-demographic"),
     ("Car availability", CAR, "socio-demographic"),
-    ("Household type", HH_TYPE, "socio-demographic"),
+    ("PT subscription", SUB, "socio-demographic"),
     ("PT quality at home", PT, "spatial"),
     ("Settlement pattern", SETTLEMENT, "spatial"),
 ]
 
 
 def read_population():
-    attrs = {"age": "age", "carAvail": "car", "home_x": "x", "home_y": "y"}
+    attrs = {"age": "age", "carAvail": "car", "subscriptions": "sub", "home_x": "x", "home_y": "y"}
     rows = []
     block = None
     with gzip.open(POPULATION, "rt", encoding="utf-8") as f:
@@ -104,25 +106,6 @@ def settlement_type(x, y, crs):
     return found.map(STALAN)
 
 
-def add_household_type(pop):
-    text = gzip.open(HOUSEHOLDS, "rt", encoding="utf-8").read()
-    member_of = {}
-    for hh in re.findall(r"<household .*?</household>", text, re.S):
-        hid = re.search(r'<household id="([^"]+)"', hh).group(1)
-        for pid in re.findall(r'refId="([^"]+)"', hh):
-            member_of[pid] = hid
-    pop["hh"] = pop.index.map(member_of)
-    grouped = pop.groupby("hh")["age"]
-    size = grouped.transform("size")  # members present in the filtered population
-    has_child = grouped.transform(lambda a: (a < 18).any())
-    kind = pd.Series("other", index=pop.index)
-    kind[(size == 2) & ~has_child] = "couple, no children"
-    kind[has_child] = "with children"
-    kind[size == 1] = "single person"
-    pop["hh_type"] = kind
-    print(f"population: {pop['hh'].isna().sum()} persons without a household")
-
-
 def share(series, categories, weights=None):
     w = weights if weights is not None else pd.Series(1.0, index=series.index)
     total = w.groupby(series).sum().reindex(categories).fillna(0.0)
@@ -130,13 +113,14 @@ def share(series, categories, weights=None):
 
 
 def read_microcensus():
-    z = pd.read_csv(MC / "zielpersonen.csv", encoding="latin1", usecols=["HHNR", "alter", "f42100e", "WP"])
-    h = pd.read_csv(MC / "haushalte.csv", encoding="latin1", usecols=["HHNR", "hhtyp", "W_OeV_KLASSE", "W_X", "W_Y"])
+    z = pd.read_csv(MC / "zielpersonen.csv", encoding="latin1", usecols=["HHNR", "alter", "f42100e", "WP", "f41610a", "f41610b", "f41610c", "f41610d"])
+    h = pd.read_csv(MC / "haushalte.csv", encoding="latin1", usecols=["HHNR", "W_OeV_KLASSE", "W_X", "W_Y"])
     mc = z.merge(h, on="HHNR")
     mc["age_c"] = pd.cut(mc["alter"], AGE_BINS, right=False, labels=AGE_LABELS)
     mc["car"] = mc["f42100e"].map({1: "available", 2: "available"}).fillna("never")  # 3 and -99 (n/a) = never
-    mc["hh_type"] = mc["hhtyp"].map({10: "single person", 210: "couple, no children", 220: "with children",
-                                     230: "with children", 30: "other"})
+    ga, ht = mc["f41610a"] == 1, mc["f41610b"] == 1
+    va = (mc["f41610c"] == 1) | (mc["f41610d"] == 1)
+    mc["sub"] = np.select([ga, ht & va, ht, va], ["GA", "VA+HT", "HT", "VA"], "none")
     mc["pt"] = mc["W_OeV_KLASSE"].map({1: "A", 2: "B", 3: "C", 4: "D", 5: "none"})
     mc["settlement"] = settlement_type(mc["W_X"], mc["W_Y"], "EPSG:4326")
     return mc
@@ -144,7 +128,6 @@ def read_microcensus():
 
 def main():
     pop = read_population()
-    add_household_type(pop)
     add_pt_quality(pop)
     pop["settlement"] = settlement_type(pop["x"], pop["y"], "EPSG:2056")
     pop["age_c"] = pd.cut(pop["age"], AGE_BINS, right=False, labels=AGE_LABELS)
@@ -152,14 +135,14 @@ def main():
     mc = read_microcensus()
     print(f"population: {len(pop)} persons; microcensus: {len(mc)} target persons")
 
-    columns = {"Age": "age_c", "Car availability": "car", "Household type": "hh_type",
+    columns = {"Age": "age_c", "Car availability": "car", "PT subscription": "sub",
                "PT quality at home": "pt", "Settlement pattern": "settlement"}
     table, summary = [], []
     fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
     for ax, (title, cats, kind) in zip(axes, ATTRIBUTES):
         col = columns[title]
         assert pop[col].notna().all(), f"unmapped population values in {title}"
-        if mc[col].isna().any():  # e.g. refused/unknown household type codes (-97, -98)
+        if mc[col].isna().any():  # e.g. unknown codes
             print(f"microcensus: {mc[col].isna().sum()} persons without {title}, excluded from its shares")
         p, m = share(pop[col], cats), share(mc[col], cats, mc["WP"])
         tvd = 0.5 * (p - m).abs().sum()  # total variation distance: share of persons that would have to move
