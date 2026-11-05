@@ -10,7 +10,8 @@ Notes
   the leg (vehicle_id of output_legs) ends in `_bus`; other suffixes are rail, ferry, funicular.
 - Microcensus: stages (etappen.csv) with f51300 = 10 (Postauto) or 11 (Bus/Schulbus) are bus stages; 12 (tram)
   does not occur in the study area. Rail = 9 (Bahn/Zug), other pt = 14 (Reisecar), 16 (Schiff), 18 (Bergbahn).
-- Persons/Wege are those of mode_share.py (home inside the boundary; microcensus Wege weighted with WP). Only
+- Persons/Wege are those of mode_share.py (home inside the boundary, trips leaving the area dropped; microcensus Wege
+  weighted with WP). Only
   shares are compared: the simulation is a 10 % sample, the microcensus is weighted to the population.
 - Trip level: a pt trip is "bus only" if all its pt legs/stages are bus, "bus + rail" if it mixes, "no bus" otherwise.
   The microcensus pt trips are the Wege with pt main mode (wmittel 2-8), as in mode_share.py.
@@ -20,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from mode_share import MC, MC_MODE, OUT, SIM, read_simulation_trips
+from mode_share import MC, MC_MODE, OUT, SIM, microcensus_wege_leaving, read_simulation_trips
 
 BUS_CODES, RAIL_CODES = {10, 11}, {9}
 KINDS = ["bus only", "bus + rail", "rail only", "other pt"]
@@ -33,23 +34,23 @@ def kind(has_bus, has_rail):
 
 
 def simulation():
-    inside = read_simulation_trips()["person"].unique()
+    kept = read_simulation_trips()  # persons inside, trips not leaving the area
     legs = pd.read_csv(SIM / "output_legs.csv.gz", sep=";", usecols=["person", "trip_id", "distance", "mode", "vehicle_id"],
                        dtype={"person": str, "trip_id": str}, low_memory=False)
-    legs = legs[legs["person"].isin(inside) & (legs["mode"] == "pt")].copy()
+    legs = legs[legs["trip_id"].isin(kept["trip_id"]) & (legs["mode"] == "pt")].copy()
     legs["vehicle"] = legs["vehicle_id"].str.rsplit("_", n=1).str[-1]
     print("simulation pt legs by vehicle:", legs["vehicle"].value_counts().to_dict())
     legs["bus"], legs["rail"] = legs["vehicle"] == "bus", legs["vehicle"] == "rail"
     trips = legs.groupby("trip_id").agg(bus=("bus", "any"), rail=("rail", "any"), n_legs=("bus", "size"))
     trips["kind"] = kind(trips["bus"], trips["rail"])
-    n_trips = len(pd.read_csv(SIM / "output_trips.csv.gz", sep=";", usecols=["person", "main_mode"], dtype={"person": str})
-                  .query("person in @inside and main_mode in ['car','car_loop','car_passenger','car_passenger_loop','pt','bike','bike_loop','walk','walk_loop','remote_walk']"))
+    n_trips = len(kept)
     return legs[legs["bus"]], legs, trips, n_trips
 
 
 def microcensus():
     w = pd.read_csv(MC / "wege.csv", encoding="latin1", usecols=["HHNR", "WEGNR", "WP", "wmittel"])
     w = w[w["wmittel"].isin(MC_MODE)]
+    w = w[~pd.MultiIndex.from_frame(w[["HHNR", "WEGNR"]]).isin(microcensus_wege_leaving())]  # Wege leaving the area
     e = pd.read_csv(MC / "etappen.csv", encoding="latin1", usecols=["HHNR", "WEGNR", "WP", "f51300", "rdist"])
     e = e.merge(w[["HHNR", "WEGNR"]], on=["HHNR", "WEGNR"])
     pt = e[e["f51300"].isin(BUS_CODES | RAIL_CODES | {14, 16, 18})].copy()

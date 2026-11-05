@@ -1,10 +1,10 @@
 metric,simulation,microcensus,simulation_n,microcensus_n,difference_pp_or_unit
-pt trips: bus only [% of pt trips],69.30,48.75,9833,436,20.55
-pt trips: bus + rail [% of pt trips],21.99,16.22,3120,144,5.77
-pt trips: rail only [% of pt trips],8.70,31.94,1234,227,-23.25
-pt trips: other pt [% of pt trips],0.01,3.09,2,12,-3.07
-trips with a bus stage [% of all trips],9.32,6.81,12953,580,2.51
-pt stages that are bus [% of pt stages],77.44,52.96,17121,655,24.48
-"bus stage length, mean [km]",4.91,4.46,17121,655,0.44
-"bus stage length, median [km]",2.92,2.91,17121,655,0.01
-bus share of pt person-km [%],56.51,13.86,22109,1139,42.66
+pt trips: bus only [% of pt trips],73.59,70.52,8590,407,3.07
+pt trips: bus + rail [% of pt trips],20.25,12.13,2364,71,8.12
+pt trips: rail only [% of pt trips],6.14,16.78,717,89,-10.64
+pt trips: other pt [% of pt trips],0.02,0.57,2,2,-0.55
+trips with a bus stage [% of all trips],9.20,6.90,10954,478,2.30
+pt stages that are bus [% of pt stages],80.70,73.69,14423,536,7.01
+"bus stage length, mean [km]",4.60,4.22,14423,536,0.38
+"bus stage length, median [km]",2.79,2.94,14423,536,-0.15
+bus share of pt person-km [%],61.56,39.71,17872,713,21.85

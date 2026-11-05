@@ -13,13 +13,14 @@ Notes
 - Microcensus shares are weighted with the person weight WP; population shares are unweighted.
 - Persons aged under 6 are dropped (the microcensus has no target persons that young).
 - Population: activity types are mapped as home*/work*/education*/shop/leisure/other; `*_secondary`
-  is folded into its base type. `outside` activities (trips leaving the study area, purpose unknown)
-  are skipped. Consecutive identical activities are merged.
+  is folded into its base type. Consecutive identical activities are merged. Persons with an `outside`
+  activity (a trip leaving the study area, purpose unknown) are dropped entirely, because their chain is incomplete.
 - Microcensus: the chain is built from the destination purpose of each trip (f52900 of the last stage
   of each Weg, in the order of the stage number). Start at home; a day without trips is "H"; a day
   that does not end at home is closed with H. Purposes: 2 work, 3 education, 4 shop, 8 leisure, 11 home;
   5 services, 9/10 accompanying -> other; 6 business, 7 service trip -> work. Unknown codes (-99, 1, 12, 13)
-  are skipped.
+  are skipped. Persons with a Weg whose origin or destination lies outside the boundary are dropped, as in the
+  population.
 - The mismatch is the total variation distance between the two chain distributions (all chains, not
   only the plotted top ones), in percentage points, as in compare.py.
 """
@@ -29,6 +30,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+
+from mode_share import microcensus_wege_leaving
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -54,18 +57,18 @@ def merge_repeats(letters):
 
 
 def read_population():
-    rows, person, age, acts = [], None, None, []
+    rows, person, age, acts, leaves = [], None, None, [], False
     outside = 0
 
     def flush():
         if person is not None:
-            rows.append({"age": age, "chain": merge_repeats(acts)})
+            rows.append({"age": age, "chain": merge_repeats(acts), "leaves": leaves})
 
     with gzip.open(POPULATION, "rt", encoding="utf-8") as f:
         for line in f:
             if "<person " in line:
                 flush()
-                person, age, acts = True, None, []
+                person, age, acts, leaves = True, None, [], False
                 continue
             if person is None:
                 continue
@@ -76,11 +79,13 @@ def read_population():
             if m:
                 if m.group(1) == "outside":
                     outside += 1
+                    leaves = True
                 elif not m.group(1).endswith(" interaction"):  # routing stage activities, not real activities
                     acts.append(POP_TYPE[m.group(1)])
         flush()
-    print(f"population: {outside} outside activities skipped")
-    return pd.DataFrame(rows)
+    pop = pd.DataFrame(rows)
+    print(f"population: {outside} outside activities; {int(pop['leaves'].sum())} of {len(pop)} persons have one and are dropped")
+    return pop[~pop["leaves"]].drop(columns="leaves")
 
 
 def read_microcensus():
@@ -92,6 +97,9 @@ def read_microcensus():
     last = last[~unknown]
     chains = last.groupby("HHNR")["f52900"].agg(lambda s: merge_repeats(["H"] + [MC_PURPOSE[c] for c in s] + ["H"]))
     z["chain"] = z["HHNR"].map(chains).fillna("H")
+    leaving = z["HHNR"].isin(microcensus_wege_leaving().get_level_values("HHNR"))
+    print(f"microcensus: {int(leaving.sum())} of {len(z)} persons have a Weg leaving the boundary and are dropped")
+    z = z[~leaving]
     return z.rename(columns={"alter": "age"})
 
 

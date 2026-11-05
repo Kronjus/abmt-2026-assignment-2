@@ -11,7 +11,9 @@ Notes
 - An activity is the destination of a trip. Population: every activity of the plan except the first one
   (the start-of-day home, which has no trip leading to it). Microcensus: the destination (Z_X/Z_Y, WGS84)
   of every stage that ends a Weg, with the purpose from f52900. Activity types and purposes are mapped as
-  in activity_chains.py. `outside` activities (population) and unknown purposes (microcensus) are skipped.
+  in activity_chains.py. Unknown purposes (microcensus) are skipped. Trips leaving the study area are dropped:
+  `outside` activities and activities reached from an `outside` activity (population), Wege whose origin lies
+  outside the boundary (microcensus).
 - Activities are counted in 1 km cells (EPSG:2056) and only those inside the study-area boundary are kept.
   The map shows each cell's share of all activities of that dataset and group, so datasets of different
   size are comparable. Microcensus shares are weighted with the person weight WP.
@@ -32,6 +34,7 @@ from matplotlib.colors import TwoSlopeNorm
 from pyproj import Transformer
 from shapely import points
 
+from mode_share import microcensus_wege_leaving
 from activity_chains import AGE_BINS, AGE_LABELS, MC_PURPOSE, MC, OUT, POP_TYPE, POPULATION, ROOT
 
 BOUNDARY = ROOT / "data" / "Boundary" / "fribourg_convexhull.shp"
@@ -40,12 +43,12 @@ BASEMAP = "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/
 
 
 def read_population():
-    rows, person, age, first = [], None, None, True
+    rows, person, age, first, prev_outside = [], None, None, True, False
     outside = 0
     with gzip.open(POPULATION, "rt", encoding="utf-8") as f:
         for line in f:
             if "<person " in line:
-                person, age, first = True, None, True
+                person, age, first, prev_outside = True, None, True, False
                 continue
             if person is None:
                 continue
@@ -56,12 +59,13 @@ def read_population():
             if m and not m.group(1).endswith(" interaction"):
                 if first:  # start-of-day activity, no trip leads to it
                     first = False
-                elif m.group(1) == "outside":
+                elif m.group(1) == "outside" or prev_outside:  # trip leaves the area or starts outside
                     outside += 1
                 else:
                     rows.append({"age": age, "type": POP_TYPE[m.group(1)],
                                  "x": float(m.group(2)), "y": float(m.group(3))})
-    print(f"population: {outside} outside activities skipped")
+                prev_outside = m.group(1) == "outside"
+    print(f"population: {outside} activities of trips leaving the area skipped")
     return pd.DataFrame(rows)
 
 
@@ -72,6 +76,9 @@ def read_microcensus():
     unknown = ~last["f52900"].isin(MC_PURPOSE)
     print(f"microcensus: {unknown.sum()} trips with unknown purpose skipped")
     last = last[~unknown].copy()
+    leaving = pd.MultiIndex.from_frame(last[["HHNR", "WEGNR"]]).isin(microcensus_wege_leaving())
+    print(f"microcensus: {int(leaving.sum())} Wege leaving the boundary skipped")
+    last = last[~leaving].copy()
     last["x"], last["y"] = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True).transform(
         last["Z_X"].to_numpy(), last["Z_Y"].to_numpy())
     last["type"] = last["f52900"].map(MC_PURPOSE)
