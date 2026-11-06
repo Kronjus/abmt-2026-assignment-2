@@ -1,0 +1,81 @@
+grouping,group,mode,source,share_%,trips,mismatch_pp
+Settlement pattern,urban,car,simulation,36.23,38889,8.22
+Settlement pattern,urban,car_passenger,simulation,9.77,38889,8.22
+Settlement pattern,urban,pt,simulation,14.90,38889,8.22
+Settlement pattern,urban,bike,simulation,2.91,38889,8.22
+Settlement pattern,urban,walk,simulation,36.19,38889,8.22
+Settlement pattern,urban,car,microcensus,41.62,2847,8.22
+Settlement pattern,urban,car_passenger,microcensus,12.32,2847,8.22
+Settlement pattern,urban,pt,microcensus,7.42,2847,8.22
+Settlement pattern,urban,bike,microcensus,3.19,2847,8.22
+Settlement pattern,urban,walk,microcensus,35.45,2847,8.22
+Settlement pattern,intermediate,car,simulation,47.76,35342,3.58
+Settlement pattern,intermediate,car_passenger,simulation,10.26,35342,3.58
+Settlement pattern,intermediate,pt,simulation,7.68,35342,3.58
+Settlement pattern,intermediate,bike,simulation,3.13,35342,3.58
+Settlement pattern,intermediate,walk,simulation,31.17,35342,3.58
+Settlement pattern,intermediate,car,microcensus,49.19,1660,3.58
+Settlement pattern,intermediate,car_passenger,microcensus,9.51,1660,3.58
+Settlement pattern,intermediate,pt,microcensus,9.83,1660,3.58
+Settlement pattern,intermediate,bike,microcensus,3.01,1660,3.58
+Settlement pattern,intermediate,walk,microcensus,28.46,1660,3.58
+Settlement pattern,rural,car,simulation,53.24,44795,2.28
+Settlement pattern,rural,car_passenger,simulation,12.23,44795,2.28
+Settlement pattern,rural,pt,simulation,7.05,44795,2.28
+Settlement pattern,rural,bike,simulation,2.73,44795,2.28
+Settlement pattern,rural,walk,simulation,24.75,44795,2.28
+Settlement pattern,rural,car,microcensus,54.55,1795,2.28
+Settlement pattern,rural,car_passenger,microcensus,10.83,1795,2.28
+Settlement pattern,rural,pt,microcensus,8.02,1795,2.28
+Settlement pattern,rural,bike,microcensus,2.67,1795,2.28
+Settlement pattern,rural,walk,microcensus,23.93,1795,2.28
+PT quality class at home,A,car,simulation,28.74,10071,10.34
+PT quality class at home,A,car_passenger,simulation,7.88,10071,10.34
+PT quality class at home,A,pt,simulation,18.21,10071,10.34
+PT quality class at home,A,bike,simulation,2.43,10071,10.34
+PT quality class at home,A,walk,simulation,42.74,10071,10.34
+PT quality class at home,A,car,microcensus,30.08,693,10.34
+PT quality class at home,A,car_passenger,microcensus,10.07,693,10.34
+PT quality class at home,A,pt,microcensus,7.87,693,10.34
+PT quality class at home,A,bike,microcensus,4.04,693,10.34
+PT quality class at home,A,walk,microcensus,47.94,693,10.34
+PT quality class at home,B,car,simulation,34.33,15647,7.48
+PT quality class at home,B,car_passenger,simulation,9.64,15647,7.48
+PT quality class at home,B,pt,simulation,15.95,15647,7.48
+PT quality class at home,B,bike,simulation,2.47,15647,7.48
+PT quality class at home,B,walk,simulation,37.61,15647,7.48
+PT quality class at home,B,car,microcensus,39.82,997,7.48
+PT quality class at home,B,car_passenger,microcensus,11.63,997,7.48
+PT quality class at home,B,pt,microcensus,11.11,997,7.48
+PT quality class at home,B,bike,microcensus,1.33,997,7.48
+PT quality class at home,B,walk,microcensus,36.11,997,7.48
+PT quality class at home,C,car,simulation,40.76,21729,4.84
+PT quality class at home,C,car_passenger,simulation,10.28,21729,4.84
+PT quality class at home,C,pt,simulation,11.28,21729,4.84
+PT quality class at home,C,bike,simulation,3.11,21729,4.84
+PT quality class at home,C,walk,simulation,34.58,21729,4.84
+PT quality class at home,C,car,microcensus,45.16,1354,4.84
+PT quality class at home,C,car_passenger,microcensus,10.20,1354,4.84
+PT quality class at home,C,pt,microcensus,9.14,1354,4.84
+PT quality class at home,C,bike,microcensus,3.55,1354,4.84
+PT quality class at home,C,walk,microcensus,31.95,1354,4.84
+PT quality class at home,D,car,simulation,48.63,35023,3.63
+PT quality class at home,D,car_passenger,simulation,10.98,35023,3.63
+PT quality class at home,D,pt,simulation,7.74,35023,3.63
+PT quality class at home,D,bike,simulation,2.98,35023,3.63
+PT quality class at home,D,walk,simulation,29.67,35023,3.63
+PT quality class at home,D,car,microcensus,51.16,1630,3.63
+PT quality class at home,D,car_passenger,microcensus,10.94,1630,3.63
+PT quality class at home,D,pt,microcensus,5.45,1630,3.63
+PT quality class at home,D,bike,microcensus,4.08,1630,3.63
+PT quality class at home,D,walk,microcensus,28.37,1630,3.63
+PT quality class at home,none,car,simulation,56.53,36556,4.78
+PT quality class at home,none,car_passenger,simulation,12.36,36556,4.78
+PT quality class at home,none,pt,simulation,5.96,36556,4.78
+PT quality class at home,none,bike,simulation,3.04,36556,4.78
+PT quality class at home,none,walk,simulation,22.11,36556,4.78
+PT quality class at home,none,car,microcensus,57.71,1628,4.78
+PT quality class at home,none,car_passenger,microcensus,11.35,1628,4.78
+PT quality class at home,none,pt,microcensus,9.56,1628,4.78
+PT quality class at home,none,bike,microcensus,1.88,1628,4.78
+PT quality class at home,none,walk,microcensus,19.51,1628,4.78

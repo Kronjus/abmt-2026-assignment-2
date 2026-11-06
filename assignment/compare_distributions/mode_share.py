@@ -22,6 +22,9 @@ Notes
 - The mismatch is the total variation distance between the share vectors, in percentage points, as in compare.py.
   The sampling noise of the microcensus (bootstrap over persons, see bootstrap_noise.py) is shown next to it and
   written to mode_share_mismatch.csv.
+- Boundary effect: mode_share_boundary_effect.csv gives the MZMV shares of the Wege inside the boundary (used here), of the
+  Wege leaving it (dropped) and of all Wege, next to the target. The target shares probably include trips across the
+  boundary, so this shows how much of the gap to the target the filter explains.
 """
 from pathlib import Path
 
@@ -91,25 +94,47 @@ def read_simulation():
     return read_simulation_trips()["mode"].value_counts().reindex(MODES, fill_value=0).astype(float)
 
 
-def read_microcensus_trips():
+def read_microcensus_trips(drop_leaving=True):
     w = pd.read_csv(MC / "wege.csv", encoding="latin1", usecols=["HHNR", "WEGNR", "WP", "wmittel", "w_dist_obj2"])
     e = pd.read_csv(MC / "etappen.csv", encoding="latin1", usecols=["HHNR", "WEGNR", "f51300", "rdist"])
     car = e[e["f51300"].isin([7, 8])].sort_values("rdist").groupby(["HHNR", "WEGNR"]).tail(1)
     passenger = car[car["f51300"] == 8].set_index(["HHNR", "WEGNR"]).index
     leaving = pd.MultiIndex.from_frame(w[["HHNR", "WEGNR"]]).isin(microcensus_wege_leaving())
-    print(f"microcensus: {leaving.sum()} of {len(w)} Wege leaving the boundary dropped")
-    w = w[~leaving].copy()
+    print(f"microcensus: {leaving.sum()} of {len(w)} Wege leaving the boundary" + (" dropped" if drop_leaving else " kept"))
+    w["leaving"] = leaving
+    w = w[~leaving].copy() if drop_leaving else w.copy()
     w["mode"] = w["wmittel"].map(MC_MODE)
     is_passenger = pd.MultiIndex.from_frame(w[["HHNR", "WEGNR"]]).isin(passenger)
     w.loc[(w["mode"] == "car") & is_passenger, "mode"] = "car_passenger"
     print(f"microcensus: {len(w)} Wege, dropped {w['mode'].isna().sum()} with mode codes "
           f"{sorted(w.loc[w['mode'].isna(), 'wmittel'].unique())}")
     return w.dropna(subset=["mode"]).rename(columns={"WP": "weight", "w_dist_obj2": "distance_km"})[
-        ["HHNR", "mode", "distance_km", "weight"]]
+        ["HHNR", "mode", "distance_km", "weight", "leaving"]]
 
 
 def read_microcensus():
     return read_microcensus_trips().groupby("mode")["weight"].sum().reindex(MODES, fill_value=0.0)
+
+
+def boundary_effect():
+    """MZMV mode shares of the Wege inside the boundary, of those leaving it and of all Wege (the filter removes
+    the leaving ones), next to the target. Also the mean distance and the share of the leaving Wege."""
+    trips = read_microcensus_trips(drop_leaving=False)
+
+    def shares(d):
+        s = d.groupby("mode")["weight"].sum().reindex(MODES, fill_value=0.0)
+        return 100 * s / s.sum()
+
+    table = pd.DataFrame({"inside_only": shares(trips[~trips["leaving"]]), "leaving": shares(trips[trips["leaving"]]),
+                          "all_wege": shares(trips),
+                          "target": 100 * pd.read_csv(TARGET).set_index("mode")["mode_share"].reindex(MODES)})
+    d = trips[trips["distance_km"] >= 0]
+    info = {"leaving_share_of_wege_%": 100 * trips.loc[trips["leaving"], "weight"].sum() / trips["weight"].sum(),
+            "mean_distance_inside_km": np.average(d.loc[~d["leaving"], "distance_km"], weights=d.loc[~d["leaving"], "weight"]),
+            "mean_distance_leaving_km": np.average(d.loc[d["leaving"], "distance_km"], weights=d.loc[d["leaving"], "weight"]),
+            "tvd_inside_only_to_target_pp": 0.5 * (table["inside_only"] - table["target"]).abs().sum(),
+            "tvd_all_wege_to_target_pp": 0.5 * (table["all_wege"] - table["target"]).abs().sum()}
+    return table, info
 
 
 def microcensus_noise():
@@ -149,6 +174,12 @@ def main():
     pd.DataFrame([{"mismatch_microcensus_pp": mismatch["microcensus"], "mismatch_target_pp": mismatch["target"],
                    "noise_mean_pp": noise_mean, "noise_p95_pp": noise_p95}]).to_csv(
         OUT / "mode_share_mismatch.csv", index=False, float_format="%.2f")
+    effect, info = boundary_effect()
+    effect.to_csv(OUT / "mode_share_boundary_effect.csv", index_label="mode", float_format="%.2f")
+    pd.DataFrame([info]).to_csv(OUT / "mode_share_boundary_effect_info.csv", index=False, float_format="%.2f")
+    print("microcensus with and without the Wege leaving the boundary (weighted shares, %)")
+    print(effect.round(1).to_string())
+    print({k: round(v, 1) for k, v in info.items()})
     print(f"Wrote {OUT}")
 
 

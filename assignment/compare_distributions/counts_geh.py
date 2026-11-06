@@ -16,6 +16,9 @@ Notes
 - GEH = sqrt(2 (M - C)^2 / (M + C)) with M, C the hourly volumes of the link (per-lane value x lanes). The usual
   limits are for hourly volumes: GEH < 5 good, < 10 acceptable. Here the volumes are 24 h averages, so the
   statistic is more lenient than a peak-hour GEH and only the daily level is validated.
+- Links with (almost) no simulated traffic (fewer than NEAR_ZERO veh/h) are probably not only an underestimation:
+  a count station may be matched to a wrong link or to a link that no simulated vehicle uses in the cut network.
+  The statistics are therefore also given without them (counts_geh_summary.csv) and for them alone.
 """
 import gzip
 import xml.etree.ElementTree as ET
@@ -28,6 +31,7 @@ from mode_share import DATA, OUT, SIM
 
 COUNTS = DATA / "Fribourg_10pct" / "network_calibration_files" / "target_counts.csv"
 SAMPLE_SIZE, HOURS = 0.1, 24.0
+NEAR_ZERO = 1.0  # veh/h, below this a link counts as having no simulated traffic
 
 
 def geh(m, c):
@@ -67,7 +71,17 @@ def main():
                           "median_abs_rel_err_%": d["rel_error_%"].abs().median(), "mean_GEH": d["geh"].mean(),
                           "median_GEH": d["geh"].median(), "GEH<5_%": 100 * (d["geh"] < 5).mean(),
                           "GEH<10_%": 100 * (d["geh"] < 10).mean(), "R2": r})
+    near_zero = df["simulated_h"] < NEAR_ZERO
+    print(f"\n{near_zero.sum()} links with less than {NEAR_ZERO} veh/h simulated, {int(near_zero.sum() - (df['simulated_h'] == 0).sum())} of them "
+          f"with a few vehicles; they carry {100 * df.loc[near_zero, 'observed_h'].sum() / df['observed_h'].sum():.1f} % of the observed volume; "
+          f"motorway links among them: {int((near_zero & (df['highway'] == 'motorway')).sum())}")
+    groups = {"all links": df, "links with simulated traffic": df[~near_zero], "links without simulated traffic": df[near_zero],
+              "motorway, with simulated traffic": df[~near_zero & (df["highway"] == "motorway")],
+              "weight 1, with simulated traffic": df[~near_zero & (df["weight"] == 1.0)]}
+    comparison = pd.DataFrame({name: summary(d) for name, d in groups.items()}).T
+    comparison.to_csv(OUT / "counts_geh_summary.csv", index_label="group", float_format="%.2f")
     pd.set_option("display.width", 220)
+    print("\nwith and without the links without simulated traffic\n", comparison.round(2).to_string())
     print("\nall links\n", summary(df).round(2).to_string())
     print("\nby weight (1.0 = trusted counts)\n", df.groupby("weight").apply(summary, include_groups=False).round(2).to_string())
     print("\nby road type\n", df.groupby("highway").apply(summary, include_groups=False).round(2).to_string())

@@ -1,0 +1,6 @@
+group,links,mean_obs_veh_h,mean_sim_veh_h,bias_%,median_abs_rel_err_%,mean_GEH,median_GEH,GEH<5_%,GEH<10_%,R2
+all links,657.00,107.61,76.03,-29.35,25.38,3.86,1.81,83.41,89.95,0.44
+links with simulated traffic,588.00,92.58,84.94,-8.25,21.73,2.20,1.56,92.18,97.45,0.87
+links without simulated traffic,69.00,235.73,0.08,-99.97,100.00,17.99,13.80,8.70,26.09,0.01
+"motorway, with simulated traffic",19.00,697.59,675.24,-3.20,8.77,4.75,2.42,84.21,94.74,0.20
+"weight 1, with simulated traffic",33.00,525.28,493.74,-6.00,10.50,3.80,2.52,87.88,93.94,0.67

@@ -6,5 +6,5 @@ pt trips: other pt [% of pt trips],0.02,0.57,2,2,-0.55
 trips with a bus stage [% of all trips],9.20,6.90,10950,478,2.30
 pt stages that are bus [% of pt stages],80.73,73.69,14423,536,7.04
 "bus stage length, mean [km]",4.60,4.22,14423,536,0.38
-"bus stage length, median [km]",2.79,2.94,14423,536,-0.15
+"bus stage length, median [km]",2.79,3.34,14423,536,-0.55
 bus share of pt person-km [%],61.61,39.71,17866,713,21.90

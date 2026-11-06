@@ -15,6 +15,7 @@ Notes
   shares are compared: the simulation is a 10 % sample, the microcensus is weighted to the population.
 - Trip level: a pt trip is "bus only" if all its pt legs/stages are bus, "bus + rail" if it mixes, "no bus" otherwise.
   The microcensus pt trips are the Wege with pt main mode (wmittel 2-8), as in mode_share.py.
+- The microcensus median stage length is a weighted median (WP).
 - Stage distance: simulation leg `distance` (routed, m) vs microcensus rdist (plausibilised, km).
 """
 import matplotlib.pyplot as plt
@@ -27,6 +28,12 @@ BUS_CODES, RAIL_CODES = {10, 11}, {9}
 KINDS = ["bus only", "bus + rail", "rail only", "other pt"]
 DIST_BINS = [0, 2, 5, 10, 20, np.inf]
 DIST_LABELS = ["0-2 km", "2-5 km", "5-10 km", "10-20 km", "20+ km"]
+
+
+def weighted_median(values, weights):
+    order = np.argsort(values.to_numpy())
+    cum = np.cumsum(weights.to_numpy()[order]) / weights.sum()
+    return values.to_numpy()[order][np.searchsorted(cum, 0.5)]
 
 
 def kind(has_bus, has_rail):
@@ -81,7 +88,8 @@ def main():
         len(s_bus), len(m_bus))
     s_km, m_km = s_bus["distance"] / 1000, m_bus["rdist"].where(m_bus["rdist"] >= 0)
     add("bus stage length, mean [km]", s_km.mean(), np.average(m_km.dropna(), weights=m_bus.loc[m_km.notna(), "WP"]), len(s_km), int(m_km.notna().sum()))
-    add("bus stage length, median [km]", s_km.median(), m_km.median(), len(s_km), int(m_km.notna().sum()))
+    add("bus stage length, median [km]", s_km.median(),
+        weighted_median(m_km.dropna(), m_bus.loc[m_km.notna(), "WP"]), len(s_km), int(m_km.notna().sum()))
     add("bus share of pt person-km [%]", 100 * s_bus["distance"].sum() / s_pt["distance"].sum(),
         100 * (m_bus["rdist"].clip(lower=0) * m_bus["WP"]).sum() / (m_pt["rdist"].clip(lower=0) * m_pt["WP"]).sum(), len(s_pt), len(m_pt))
     table = pd.DataFrame(rows)
@@ -119,7 +127,7 @@ def main():
     ax.set_xticks(x, [f"{l}\nn={m_n[l]} mic." for l in DIST_LABELS], fontsize=8)
     ax.set_ylabel("share of bus stages [%]")
     ax.set_title("Length of bus stages")
-    fig.suptitle(f"Bus: simulation ({len(s_bus)} bus legs) vs microcensus ({len(m_bus)} bus stages, unweighted)")
+    fig.suptitle(f"Bus: simulation ({len(s_bus)} bus legs) vs microcensus ({len(m_bus)} bus stages, weighted with WP; n = unweighted counts)")
     fig.tight_layout()
     fig.savefig(OUT / "bus.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     print(f"Wrote {OUT}")

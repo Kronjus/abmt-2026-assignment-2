@@ -1,11 +1,11 @@
 figure,group,activities_population,activities_microcensus,total_variation_distance_pp
-activity_map,All persons,123059,6312,27.42
-activity_map,Age 6-17,21261,1208,46.40
-activity_map,Age 18-44,47842,2274,37.12
-activity_map,Age 45-64,35219,2041,41.46
-activity_map,Age 65+,18737,789,50.67
-activity_map_no_home,All persons,68253,3874,31.42
-activity_map_no_home,Age 6-17,11515,693,46.49
-activity_map_no_home,Age 18-44,27549,1444,38.98
-activity_map_no_home,Age 45-64,19618,1263,43.60
-activity_map_no_home,Age 65+,9571,474,51.80
+activity_map,All persons,123059,6312,6.19
+activity_map,Age 6-17,21261,1208,11.68
+activity_map,Age 18-44,47842,2274,8.82
+activity_map,Age 45-64,35219,2041,7.77
+activity_map,Age 65+,18737,789,11.16
+activity_map_no_home,All persons,68253,3874,7.37
+activity_map_no_home,Age 6-17,11515,693,13.18
+activity_map_no_home,Age 18-44,27549,1444,9.88
+activity_map_no_home,Age 45-64,19618,1263,8.24
+activity_map_no_home,Age 65+,9571,474,10.64
