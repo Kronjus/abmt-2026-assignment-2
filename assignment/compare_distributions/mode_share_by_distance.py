@@ -67,7 +67,7 @@ def main():
     ax.legend(ncol=len(MODES), frameon=False, loc="lower center", bbox_to_anchor=(0.5, 1.0))
     fig.tight_layout()
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "mode_share_by_distance.png", dpi=150)
+    fig.savefig(OUT / "mode_share_by_distance.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
 
     rows = []
     for name, (_, shares) in sources.items():

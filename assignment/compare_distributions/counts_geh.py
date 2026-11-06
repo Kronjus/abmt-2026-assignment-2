@@ -90,7 +90,7 @@ def main():
     ax.set(xlabel="GEH (clipped at 20)", ylabel="links",
            title=f"GEH < 5: {100 * ok.mean():.0f} % of {len(df)} links, GEH < 10: {100 * (df['geh'] < 10).mean():.0f} %")
     fig.tight_layout()
-    fig.savefig(OUT / "counts_geh.png", dpi=150)
+    fig.savefig(OUT / "counts_geh.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     print(f"Wrote {OUT}")
 
 

@@ -142,7 +142,7 @@ def main():
     ax.legend(frameon=False)
     fig.tight_layout()
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "mode_share.png", dpi=150)
+    fig.savefig(OUT / "mode_share.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     shares.to_csv(OUT / "mode_share.csv", index_label="mode", float_format="%.2f")
     print(shares.round(1).to_string())
     print({k: round(v, 1) for k, v in mismatch.items()}, f"noise mean {noise_mean:.1f}, p95 {noise_p95:.1f}")

@@ -120,7 +120,7 @@ def draw(shares, boundary, extent, title, path):
     fig.suptitle(title, fontsize=14)
     fig.text(0.99, 0.003, "Basemap: © swisstopo (Landeskarte grau)", ha="right", fontsize=8)
     fig.tight_layout(rect=(0, 0, 1, 0.98))
-    fig.savefig(path, dpi=120)
+    fig.savefig(path, dpi=120, bbox_inches="tight", pad_inches=0.05)
     plt.close(fig)
 
 

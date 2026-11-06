@@ -146,7 +146,7 @@ def main():
              "(e.g. H-W-H = home, work, home; H alone = stays home all day)", fontsize=10, va="bottom")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "chains.png", dpi=150)
+    fig.savefig(OUT / "chains.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     df = pd.DataFrame(table).sort_values(["group", "population_%"], ascending=[True, False])
     df.to_csv(OUT / "chains.csv", index=False, float_format="%.2f")
     summary = pd.DataFrame(summary)

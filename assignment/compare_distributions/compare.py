@@ -171,7 +171,7 @@ def main():
     fig.legend(handles, labels, loc="lower center", ncol=2, frameon=False)
     fig.tight_layout(rect=(0, 0.07, 1, 1))  # leave room for the legend below the plots
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "comparison.png", dpi=150)
+    fig.savefig(OUT / "comparison.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     df = pd.DataFrame(table)
     df.to_csv(OUT / "comparison.csv", index=False, float_format="%.2f")
     print(df.round(1).to_string(index=False))

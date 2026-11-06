@@ -4,7 +4,8 @@ filtered microcensus.
 Usage (from the repository root, after assignment/filter_data/filter_data.py):
     .venv/Scripts/python assignment/compare_distributions/mode_share_by_age_pt_quality.py
 
-Outputs: assignment/compare_distributions/output/mode_share_by_age_pt_quality.csv and .png
+Outputs: assignment/compare_distributions/output/mode_share_by_age_pt_quality.csv and .png, and
+mode_share_by_age_pt_quality_mismatch.png (heatmap of the mismatch per cell)
 
 Notes
 - Trips, modes and filters are those of mode_share.py. Trips are grouped by the person's age and by the
@@ -77,6 +78,29 @@ def mode_shares(df, weights=None):
     return 100 * table.div(table.sum(axis=1), axis=0)
 
 
+def heatmap(rows):
+    """Mismatch (TVD, pp) per PT quality class and age group, with the number of microcensus trips."""
+    cells = rows[rows["source"] == "microcensus"].drop_duplicates(["pt_class", "age_group"])
+    tvd = cells.pivot(index="pt_class", columns="age_group", values="mismatch_pp").reindex(index=CLASSES, columns=AGE_LABELS)
+    n = cells.pivot(index="pt_class", columns="age_group", values="trips").reindex(index=CLASSES, columns=AGE_LABELS)
+    fig, ax = plt.subplots(figsize=(7, 3.8))
+    im = ax.imshow(tvd.to_numpy(dtype=float), cmap="YlOrRd", vmin=0, vmax=20, aspect="auto")
+    for i in range(len(CLASSES)):
+        for j in range(len(AGE_LABELS)):
+            v = tvd.iloc[i, j]
+            if not np.isnan(v):
+                ax.text(j, i, f"{v:.1f}\n(n={int(n.iloc[i, j])})", ha="center", va="center", fontsize=8,
+                        color="white" if v > 14 else "black")
+    ax.set_xticks(range(len(AGE_LABELS)), AGE_LABELS)
+    ax.set_yticks(range(len(CLASSES)), ["no class" if c == "none" else c for c in CLASSES])
+    ax.set_xlabel("age group")
+    ax.set_ylabel("PT quality class at home")
+    ax.set_title("Mode share mismatch (TVD, pp); n = microcensus trips")
+    fig.colorbar(im, ax=ax, label="mismatch [pp]")
+    fig.tight_layout()
+    fig.savefig(OUT / "mode_share_by_age_pt_quality_mismatch.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
+
+
 def main():
     sim, mc = prepare(simulation_trips()), prepare(microcensus_trips())
     print(f"trips: simulation {len(sim)}, microcensus {len(mc)}")
@@ -126,8 +150,9 @@ def main():
                  y=1.0)
     fig.tight_layout(rect=(0, 0, 1, 0.92))
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "mode_share_by_age_pt_quality.png", dpi=130)
+    fig.savefig(OUT / "mode_share_by_age_pt_quality.png", dpi=130, bbox_inches="tight", pad_inches=0.05)
     pd.DataFrame(rows).to_csv(OUT / "mode_share_by_age_pt_quality.csv", index=False, float_format="%.2f")
+    heatmap(pd.DataFrame(rows))
     print(pd.DataFrame({"simulation_n": s_n, "microcensus_n": m_n}).unstack().to_string())
     print(f"Wrote {OUT}")
 

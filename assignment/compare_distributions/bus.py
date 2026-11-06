@@ -121,7 +121,7 @@ def main():
     ax.set_title("Length of bus stages")
     fig.suptitle(f"Bus: simulation ({len(s_bus)} bus legs) vs microcensus ({len(m_bus)} bus stages, unweighted)")
     fig.tight_layout()
-    fig.savefig(OUT / "bus.png", dpi=150)
+    fig.savefig(OUT / "bus.png", dpi=150, bbox_inches="tight", pad_inches=0.05)
     print(f"Wrote {OUT}")
 
 
