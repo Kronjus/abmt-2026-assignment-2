@@ -1,22 +1,22 @@
 type,attribute,category,population_%,microcensus_%,difference_pp
-socio-demographic,Age,0-17,18.62,14.67,3.95
-socio-demographic,Age,18-29,14.61,16.11,-1.50
-socio-demographic,Age,30-44,20.64,22.75,-2.10
-socio-demographic,Age,45-64,27.52,30.73,-3.21
-socio-demographic,Age,65-79,13.26,12.15,1.11
-socio-demographic,Age,80+,5.35,3.60,1.75
-socio-demographic,Car availability,available,69.93,70.68,-0.75
-socio-demographic,Car availability,never,30.07,29.32,0.75
-socio-demographic,PT subscription,GA,10.59,7.62,2.96
-socio-demographic,PT subscription,HT,19.10,18.27,0.84
-socio-demographic,PT subscription,VA,6.49,7.90,-1.41
-socio-demographic,PT subscription,VA+HT,4.29,4.17,0.12
-socio-demographic,PT subscription,none,59.52,62.04,-2.51
-spatial,PT quality at home,A,7.88,8.16,-0.27
-spatial,PT quality at home,B,12.19,8.64,3.55
-spatial,PT quality at home,C,17.70,11.11,6.59
-spatial,PT quality at home,D,29.30,26.82,2.49
-spatial,PT quality at home,none,32.91,45.28,-12.36
+socio-demographic,Age,6-17,14.00,14.67,-0.67
+socio-demographic,Age,18-29,15.44,16.11,-0.67
+socio-demographic,Age,30-44,21.82,22.75,-0.93
+socio-demographic,Age,45-64,29.09,30.73,-1.65
+socio-demographic,Age,65-79,14.01,12.15,1.86
+socio-demographic,Age,80+,5.65,3.60,2.06
+socio-demographic,Car availability,available,73.90,70.68,3.22
+socio-demographic,Car availability,never,26.10,29.32,-3.22
+socio-demographic,PT subscription,GA,11.19,7.62,3.56
+socio-demographic,PT subscription,HT,20.19,18.27,1.92
+socio-demographic,PT subscription,VA,6.86,7.90,-1.04
+socio-demographic,PT subscription,VA+HT,4.54,4.17,0.36
+socio-demographic,PT subscription,none,57.23,62.04,-4.81
+spatial,PT quality at home,A,7.90,9.68,-1.78
+spatial,PT quality at home,B,12.18,10.15,2.02
+spatial,PT quality at home,C,17.62,18.85,-1.23
+spatial,PT quality at home,D,29.27,27.74,1.53
+spatial,PT quality at home,none,33.03,33.58,-0.54
 spatial,Settlement pattern,urban,30.03,30.21,-0.18
-spatial,Settlement pattern,intermediate,30.74,30.48,0.26
-spatial,Settlement pattern,rural,39.22,39.31,-0.08
+spatial,Settlement pattern,intermediate,30.82,30.48,0.34
+spatial,Settlement pattern,rural,39.14,39.31,-0.16

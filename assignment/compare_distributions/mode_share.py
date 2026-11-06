@@ -20,6 +20,8 @@ Notes
   (Z_X/Z_Y of the last stage) lies outside the boundary are dropped, as in the simulation.
 - Target: data/Fribourg_10pct/global_target_mode_shares.csv.
 - The mismatch is the total variation distance between the share vectors, in percentage points, as in compare.py.
+  The sampling noise of the microcensus (bootstrap over persons, see bootstrap_noise.py) is shown next to it and
+  written to mode_share_mismatch.csv.
 """
 from pathlib import Path
 
@@ -29,6 +31,8 @@ import numpy as np
 import pandas as pd
 from pyproj import Transformer
 from shapely import points
+
+from bootstrap_noise import tvd_noise
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -108,6 +112,12 @@ def read_microcensus():
     return read_microcensus_trips().groupby("mode")["weight"].sum().reindex(MODES, fill_value=0.0)
 
 
+def microcensus_noise():
+    trips = read_microcensus_trips()
+    counts = trips.pivot_table(index="HHNR", columns="mode", values="weight", aggfunc="sum", fill_value=0.0)
+    return tvd_noise(counts.reindex(columns=MODES, fill_value=0.0))
+
+
 def main():
     shares = pd.DataFrame({
         "simulation": read_simulation(),
@@ -117,6 +127,7 @@ def main():
     shares = 100 * shares / shares.sum()
     mismatch = {c: 0.5 * (shares["simulation"] - shares[c]).abs().sum() for c in ("microcensus", "target")}
 
+    noise_mean, noise_p95 = microcensus_noise()
     fig, ax = plt.subplots(figsize=(10, 5.5))
     x = np.arange(len(MODES))
     for i, col in enumerate(shares.columns):
@@ -126,14 +137,18 @@ def main():
     ax.set_ylabel("share of trips [%]")
     ax.set_title("Aggregated mode share: simulation vs microcensus vs target\n"
                  f"mismatch of simulation: {mismatch['microcensus']:.1f} pp to microcensus, "
-                 f"{mismatch['target']:.1f} pp to target")
+                 f"{mismatch['target']:.1f} pp to target\n"
+                 f"sampling noise of the microcensus: {noise_mean:.1f} pp mean, {noise_p95:.1f} pp 95th percentile")
     ax.legend(frameon=False)
     fig.tight_layout()
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "mode_share.png", dpi=150)
     shares.to_csv(OUT / "mode_share.csv", index_label="mode", float_format="%.2f")
     print(shares.round(1).to_string())
-    print({k: round(v, 1) for k, v in mismatch.items()})
+    print({k: round(v, 1) for k, v in mismatch.items()}, f"noise mean {noise_mean:.1f}, p95 {noise_p95:.1f}")
+    pd.DataFrame([{"mismatch_microcensus_pp": mismatch["microcensus"], "mismatch_target_pp": mismatch["target"],
+                   "noise_mean_pp": noise_mean, "noise_p95_pp": noise_p95}]).to_csv(
+        OUT / "mode_share_mismatch.csv", index=False, float_format="%.2f")
     print(f"Wrote {OUT}")
 
 

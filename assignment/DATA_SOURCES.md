@@ -15,7 +15,7 @@ The `data/` folder is git-ignored, so this file records what is in it and where 
 | CRS | EPSG:2056 (LV95) |
 | Content | Polygons with `KLASSE` = A (very good) to D; locations outside every polygon have no class |
 | License | Open use, source must be credited (per the opendata.swiss entry) |
-| Version / download date | 2026 edition per the folder name; exact download date **TODO** |
+| Version / download date | 2026 edition per the folder name; downloaded 2026-11-06 |
 
 ### Stadt/Land-Typologie 2012 (settlement pattern)
 

@@ -1,6 +1,6 @@
-attribute,type,total_variation_distance_pp
-Age,socio-demographic,6.81
-Car availability,socio-demographic,0.75
-PT subscription,socio-demographic,3.92
-PT quality at home,spatial,12.63
-Settlement pattern,spatial,0.26
+attribute,type,total_variation_distance_pp,noise_mean_pp,noise_p95_pp
+Age,socio-demographic,3.91,2.28,3.78
+Car availability,socio-demographic,3.22,0.96,2.29
+PT subscription,socio-demographic,5.85,1.73,3.04
+PT quality at home,spatial,3.56,2.05,3.42
+Settlement pattern,spatial,0.34,1.52,2.95
