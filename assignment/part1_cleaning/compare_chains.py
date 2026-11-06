@@ -4,6 +4,7 @@ because their 'outside' activities have no known purpose."""
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import plot_style as ps
 from config import CLEAN_DIR, DATA
 
 OUT = DATA / "results"   # inside data/, so it is not tracked by Git
@@ -36,6 +37,7 @@ def compare(p_df, m_df):
 
 
 def main():
+    ps.apply()
     ms, mz = load("matsim"), load("microcensus")
 
     for name, df in [("MATSim", ms), ("Mikrozensus", mz)]:
@@ -46,36 +48,32 @@ def main():
     groups = [("All persons", ms, mz)] + [
         (f"Age {a}", ms[ms["age_group"] == a], mz[mz["age_group"] == a]) for a in AGE_LABELS]
 
-    fig = plt.figure(figsize=(16, 10))
-    grid = fig.add_gridspec(2, 4)
-    axes = [fig.add_subplot(grid[0, :])] + [fig.add_subplot(grid[1, i]) for i in range(4)]
+    # all persons on top, then the four age groups in a 2x2 grid
+    fig = plt.figure(figsize=(ps.TEXT_WIDTH, 8.5))
+    grid = fig.add_gridspec(3, 2)
+    axes = [fig.add_subplot(grid[0, :])] + [fig.add_subplot(grid[r, c]) for r in (1, 2) for c in (0, 1)]
     tables, summary = [], []
 
     for ax, (title, p_df, m_df) in zip(axes, groups):
         both, mismatch = compare(p_df, m_df)
         summary.append({"group": title, "n MATSim": len(p_df), "n MZ": len(m_df),
-                        "mismatch pp": round(mismatch, 1)})
+                        "mismatch %": round(mismatch, 1)})
         tables.append(both.assign(group=title))
 
         top = both.assign(avg=both.mean(axis=1)).nlargest(TOP, "avg").drop(columns="avg")
         top.loc["other chains"] = both.drop(top.index).sum()
         y = range(len(top))
-        ax.barh([i - 0.2 for i in y], top["MATSim"], 0.4, label="MATSim")
-        ax.barh([i + 0.2 for i in y], top["Mikrozensus"], 0.4, label="Mikrozensus (weighted)")
+        ax.barh([i - 0.2 for i in y], top["MATSim"], 0.4, color=ps.MATSIM, label=ps.LABELS["matsim"])
+        ax.barh([i + 0.2 for i in y], top["Mikrozensus"], 0.4, color=ps.MZ, label=ps.LABELS["mz"])
+        ps.bar_grid(ax, axis="x")
         ax.set_yticks(list(y), top.index)
         ax.invert_yaxis()
         ax.set_xlabel("share of persons [%]")
-        ax.set_title(f"{title} (n = {len(p_df)} / {len(m_df)})\nmismatch: {mismatch:.1f} pp")
+        ax.set_title(f"{title}\nmismatch {mismatch:.1f}%")
 
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower right", ncol=2, frameon=False)
-    fig.text(0.01, 0.01, "H home, W work, E education, S shop, L leisure, O other "
-                         "(H alone = stays at home all day)", fontsize=9)
+    ps.shared_legend(fig, axes[0])
     fig.tight_layout(rect=(0, 0.03, 1, 1))
-
-    OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / "chains.pdf")              # for Overleaf
-    fig.savefig(OUT / "chains.png", dpi=150)     # for a quick look
+    ps.save(fig, OUT, "chains")
     pd.concat(tables).round(2).to_csv(OUT / "chains.csv", index_label="chain")
 
     print()

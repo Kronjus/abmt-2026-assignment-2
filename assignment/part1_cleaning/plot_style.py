@@ -5,7 +5,7 @@ from matplotlib.colors import ListedColormap
 
 MATSIM = "#966283"   # mauve
 MZ = "#EABDA0"       # peach
-LABELS = {"matsim": "MATSim", "mz": "Mikrozensus (weighted)"}
+LABELS = {"matsim": "Synthetic population", "mz": "Mikrozensus (weighted)"}
 
 DIFF_CMAP = plt.get_cmap("RdBu_r")    # blue = MATSim fewer, white = equal, red = MATSim more
 SHARE_CMAP = ListedColormap(DIFF_CMAP(np.linspace(0.5, 1.0, 256)), name="RdBu_r_upper")  # upper half: white -> red

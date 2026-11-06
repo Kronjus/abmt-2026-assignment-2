@@ -49,7 +49,6 @@ def shares(df, col, categories):
 ATTRIBUTES = [  # (title, column, categories, kind)
     ("Age class", "age_class", AGE_LABELS[1:], "socio-demographic"),
     ("Car availability", "car_avail", CAR_CLASSES, "socio-demographic"),
-    ("Household type", "household_type", HH_TYPES, "socio-demographic"),
     ("PT pass", "subscription", SUBSCRIPTIONS, "socio-demographic"),
     ("PT quality at home", "pt_quality", PT_CLASSES, "spatial"),
     ("Settlement type at home", "settlement", SETTLEMENTS, "spatial"),
@@ -67,7 +66,8 @@ def main():
 
     if PT_FILE.exists():
         add_pt_quality_are(ms)
-        print("PT quality: MATSim from ARE 2026 polygons, MZ from its own W_OeV_KLASSE (2015)")
+        add_pt_quality_are(mz)   # both datasets classified with the ARE map of 2026
+        print("PT quality: both datasets classified with the ARE map of 2026")
     else:
         print("WARNING: ARE file not found - MATSim PT quality uses eqasim's own 'ovgk' attribute for now")
 
@@ -85,13 +85,14 @@ def main():
         x = np.arange(len(cats))
         ax.bar(x - 0.2, p.values, 0.4, color=ps.MATSIM, label=ps.LABELS["matsim"])
         ax.bar(x + 0.2, m.values, 0.4, color=ps.MZ, label=ps.LABELS["mz"])
-        ax.set_xticks(x, cats, rotation=25, ha="right")
+        ax.set_xticks(x, cats, rotation=45, ha="right", rotation_mode="anchor")
         ax.set_ylabel("share of persons [%]")
         ps.bar_grid(ax)
-        ax.set_title(f"{title} · {mm:.1f} pp")
+        ax.set_title(f"{title}\nmismatch {mm:.1f}%")
         if n_missing:
             print(f"{title}: {n_missing} MZ persons with missing value (for the caption)")
-
+    for ax in axes.flat[len(ATTRIBUTES):]:
+        ax.set_visible(False)
     ps.shared_legend(fig, axes.flat[0])
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     ps.save(fig, OUT, "attributes")
